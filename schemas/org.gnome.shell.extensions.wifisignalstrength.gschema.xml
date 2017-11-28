@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="wifisignalstrength">
+    <schema id="org.gnome.shell.extensions.wifisignalstrength" path="/org/gnome/shell/extensions/wifisignalstrength/">
+        <key name="refresh-time" type="i">
+            <default>5</default>
+            <summary>Text refresh time</summary>
+            <description>Time to update the signal information</description>
+        </key>
+    </schema>
+</schemalist>

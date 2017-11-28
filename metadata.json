@@ -1,0 +1,11 @@
+{
+    "shell-version": [
+        "3.16",
+        "3.18"
+    ],
+    "name": "Wifi Signal Strenght Monitor",
+    "description": "Displays Wifi Signal Strenght and Speed on the panel",
+    "uuid": "wifisignalstrength@tomin.site",
+    "gettext-domain": "wifisignalstrength",
+    "settings-schema": "org.gnome.shell.extensions.wifisignalstrength"
+}
