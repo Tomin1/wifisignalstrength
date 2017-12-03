@@ -12,5 +12,6 @@
     "uuid": "wifisignalstrength@tomin.site",
     "url": "https://github.com/Tomin1/wifisignalstrength",
     "gettext-domain": "wifisignalstrength",
-    "settings-schema": "org.gnome.shell.extensions.wifisignalstrength"
+    "settings-schema": "org.gnome.shell.extensions.wifisignalstrength",
+    "version": 2
 }
