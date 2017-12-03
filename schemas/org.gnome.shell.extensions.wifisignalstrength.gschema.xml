@@ -3,8 +3,8 @@
     <schema id="org.gnome.shell.extensions.wifisignalstrength" path="/org/gnome/shell/extensions/wifisignalstrength/">
         <key name="refresh-time" type="i">
             <default>5</default>
-            <summary>Text refresh time</summary>
-            <description>Time to update the signal information</description>
+            <summary>Text refresh interval</summary>
+            <description>Interval to update the signal information</description>
         </key>
     </schema>
 </schemalist>
