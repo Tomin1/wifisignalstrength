@@ -1,7 +1,11 @@
 {
     "shell-version": [
         "3.16",
-        "3.18"
+        "3.18",
+        "3.20",
+        "3.22",
+        "3.24",
+        "3.26"
     ],
     "name": "Wifi Signal Strength Monitor",
     "description": "Displays Wifi Signal Strength and Speed on the panel",
