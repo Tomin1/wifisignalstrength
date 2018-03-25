@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 Tomi Leppänen
+ * Copyright 2015-2018 Tomi Leppänen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -30,8 +30,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
-const NetworkManager = imports.gi.NetworkManager;
-const NMC = imports.gi.NMClient;
+const NM = imports.gi.NM;
 
 const WifiSignalMonitor = new Lang.Class({
     Name: 'WifiSignalMonitor',
@@ -50,19 +49,18 @@ const WifiSignalMonitor = new Lang.Class({
         this._wifi = null;
         let layout = new St.BoxLayout();
         this._icon = new St.Icon({ icon_name: 'network-wireless-symbolic',
-                                 style_class: 'system-status-icon' });
+                                   style_class: 'system-status-icon' });
         layout.add_actor(this._icon);
         this._text = new St.Label({text: "N/A"});
         layout.add_actor(this._text);
         this.set_child(layout);
         this.connect('button-press-event', Lang.bind(this, this._updateText));
 
-        NMC.Client.new_async(null, Lang.bind(this, function(obj, result) {
-            let client = NMC.Client.new_finish(result);
+        NM.Client.new_async(null, Lang.bind(this, function(obj, result) {
+            let client = NM.Client.new_finish(result);
             let devices = client.get_devices();
             for (let d = 0; d < devices.length; d++) {
-                if (devices[d].get_device_type() ==
-                        NetworkManager.DeviceType.WIFI)
+                if (devices[d].get_device_type() == NM.DeviceType.WIFI)
                     this._wifi = devices[d];
             }
             this._updateText();
