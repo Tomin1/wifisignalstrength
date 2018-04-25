@@ -29,8 +29,22 @@ const Mainloop = imports.mainloop;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const Config = imports.misc.config;
+const version = Config.PACKAGE_VERSION.split('.').map(
+    function(value, index, arr) {
+        return parseInt(value);
+});
 
-const NM = imports.gi.NM;
+// Select NetworkManager bindings based on Gnome version.
+// Older Gnome versions (such as 3.26) require use of GObject interface
+// and newer versions (such as 3.28) require use of libnm or they will crash.
+if (Config.PACKAGE_VERSION[0] == 3 && Config.PACKAGE_VERSION[1] < 28) {
+    const NM = imports.gi.NMClient;
+    const DeviceTypeWIFI = imports.gi.NetworkManager.DeviceType.WIFI;
+} else {
+    const NM = imports.gi.NM;
+    const DeviceTypeWIFI = NM.DeviceTypeWIFI;
+}
 
 const WifiSignalMonitor = new Lang.Class({
     Name: 'WifiSignalMonitor',
@@ -60,7 +74,7 @@ const WifiSignalMonitor = new Lang.Class({
             let client = NM.Client.new_finish(result);
             let devices = client.get_devices();
             for (let d = 0; d < devices.length; d++) {
-                if (devices[d].get_device_type() == NM.DeviceType.WIFI)
+                if (devices[d].get_device_type() == DeviceTypeWIFI)
                     this._wifi = devices[d];
             }
             this._updateText();
