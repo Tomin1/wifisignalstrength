@@ -38,13 +38,10 @@ const version = Config.PACKAGE_VERSION.split('.').map(
 // Select NetworkManager bindings based on Gnome version.
 // Older Gnome versions (such as 3.26) require use of GObject interface
 // and newer versions (such as 3.28) require use of libnm or they will crash.
-if (Config.PACKAGE_VERSION[0] == 3 && Config.PACKAGE_VERSION[1] < 28) {
-    const NM = imports.gi.NMClient;
-    const DeviceTypeWIFI = imports.gi.NetworkManager.DeviceType.WIFI;
-} else {
-    const NM = imports.gi.NM;
-    const DeviceTypeWIFI = NM.DeviceTypeWIFI;
-}
+const NM = (version[0] == 3 && version[1] < 28) ?
+    imports.gi.NMClient : imports.gi.NM;
+const DeviceTypeWIFI = (version[0] == 3 && version[1] < 28) ?
+    imports.gi.NetworkManager.DeviceType.WIFI : NM.DeviceType.WIFI;
 
 const WifiSignalMonitor = new Lang.Class({
     Name: 'WifiSignalMonitor',
