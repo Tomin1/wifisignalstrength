@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 Tomi Leppänen
+ * Copyright 2015-2019 Tomi Leppänen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -66,7 +66,24 @@ const WifiSignalMonitor = new Lang.Class({
         layout.add_actor(this._text);
         this.set_child(layout);
         this.connect('button-press-event', Lang.bind(this, this._updateText));
+        this._setupWifi();
+        this._updateText();
+    },
 
+    _updateText: function() {
+        let ap = undefined;
+	if (!this._wifi || !(ap = this._wifi.get_active_access_point()))
+	    this._setupWifi();
+        if (this._wifi && (ap = this._wifi.get_active_access_point())) {
+            let bitrate = this._wifi.get_bitrate()/1000;
+            let strength = ap.get_strength();
+            this._text.text = "%d %%, %d Mb/s".format(strength, bitrate);
+        } else
+            this._text.text = "N/A";
+        this._resetTimeout();
+    },
+
+    _setupWifi: function() {
         NM.Client.new_async(null, Lang.bind(this, function(obj, result) {
             let client = NM.Client.new_finish(result);
             let devices = client.get_devices();
@@ -74,19 +91,14 @@ const WifiSignalMonitor = new Lang.Class({
                 if (devices[d].get_device_type() == DeviceTypeWIFI)
                     this._wifi = devices[d];
             }
-            this._updateText();
         }));
     },
 
-    _updateText: function() {
-        if (this._wifi) {
-            let bitrate = this._wifi.get_bitrate()/1000;
-            let strength = this._wifi.get_active_access_point().get_strength();
-            this._text.text = "%d %%, %d Mb/s".format(strength, bitrate);
-        } else
-            this._text.text = "N/A";
+    _resetTimeout: function() {
+        Mainloop.source_remove(this._timeout);
+        this._waittime = this._schema.get_int('refresh-time');
         this._timeout = Mainloop.timeout_add_seconds(this._waittime,
-                                            Lang.bind(this, this._updateText));
+                            Lang.bind(this, this._updateText));
     }
 });
 
