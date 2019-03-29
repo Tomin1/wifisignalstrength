@@ -6,7 +6,9 @@
         "3.22",
         "3.24",
         "3.26",
-        "3.28"
+        "3.28",
+	"3.30",
+	"3.32"
     ],
     "name": "Wifi Signal Strength Monitor",
     "description": "Displays Wifi Signal Strength and Speed on the panel",
@@ -14,5 +16,5 @@
     "url": "https://github.com/Tomin1/wifisignalstrength",
     "gettext-domain": "wifisignalstrength",
     "settings-schema": "org.gnome.shell.extensions.wifisignalstrength",
-    "version": 3
+    "version": 4
 }
