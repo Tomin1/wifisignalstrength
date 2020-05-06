@@ -77,7 +77,7 @@ const WifiSignalMonitor = new Lang.Class({
         if (this._wifi && (ap = this._wifi.get_active_access_point())) {
             let bitrate = this._wifi.get_bitrate()/1000;
             let strength = ap.get_strength();
-            this._text.text = "%d %%, %d Mb/s".format(strength, bitrate);
+            this._text.text = "%d %%, %d MBit/s".format(strength, bitrate);
         } else
             this._text.text = "N/A";
         this._resetTimeout();
