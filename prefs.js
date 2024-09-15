@@ -47,7 +47,12 @@ export default class WifiSignalMonitorPreferences extends ExtensionPreferences {
             upper: 60,
             step_increment: 1,
         });
-        window._settings.bind('refresh-time', adjustment, 'value', Gio.SettingsBindFlags.DEFAULT);
+        window._settings.bind(
+            'refresh-time',
+            adjustment,
+            'value',
+            Gio.SettingsBindFlags.DEFAULT
+        );
         const group = new Adw.PreferencesGroup({
             title: _('Basic'),
         });
@@ -61,7 +66,12 @@ export default class WifiSignalMonitorPreferences extends ExtensionPreferences {
             title: _("Use Mbit as unit instead of Mb"),
             subtitle: _("Change displayed unit abbreviation")
         });
-        window._settings.bind('mbit-units', abbreviationRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        window._settings.bind(
+            'mbit-units',
+            abbreviationRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
         group.add(abbreviationRow);
     }
 }

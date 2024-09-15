@@ -37,7 +37,11 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
         this._settings = this.getSettings();
         this._timeout = null;
         this._wifi = null;
-        let layout = new St.BoxLayout({ vertical: false, x_expand: true, y_align: Clutter.ActorAlign.CENTER });
+        let layout = new St.BoxLayout({
+            vertical: false,
+            x_expand: true,
+            y_align: Clutter.ActorAlign.CENTER
+        });
         this._icon = new St.Icon({
             icon_name: 'network-wireless-symbolic',
             style_class: 'system-status-icon'
