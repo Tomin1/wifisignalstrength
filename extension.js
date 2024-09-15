@@ -34,7 +34,7 @@ import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js'
 export default class WifiSignalStrengthMonitorExtension extends Extension {
     enable() {
         this._widget = new PanelMenu.Button(0.0, this.metadata.name, false);
-        this._schema = this.getSettings('org.gnome.shell.extensions.wifisignalstrength');
+        this._settings = this.getSettings();
         this._timeout = null;
         this._wifi = null;
         let layout = new St.BoxLayout({ vertical: false, x_expand: true, y_align: Clutter.ActorAlign.CENTER });
@@ -49,6 +49,17 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
         this._widget.connect('button-press-event', () => { this._updateText(); });
         this._setupWifi();
         Main.panel.addToStatusArea(this.uuid, this._widget);
+        this._settings.connect('changed', (settings, key) => {
+            if (key == 'refresh-time') {
+                this._waittime = settings.get_int('refresh-time');
+                this._setupTimeout();
+            } else if (key == 'mbit-units') {
+                this._unit = settings.get_boolean('mbit-units') ? 'Mbit' : 'Mb';
+                this._updateText();
+            }
+        });
+        this._waittime = this._settings.get_int('refresh-time');
+        this._unit = this._settings.get_boolean('mbit-units') ? 'Mbit' : 'Mb';
     }
 
     disable() {
@@ -72,7 +83,7 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
             this._text.text = "%d %%, %d %s/s".format(
                 strength,
                 bitrate,
-                this._schema.get_boolean('mbit-units') ? 'Mbit' : 'Mb'
+                this._unit
             );
         } else {
             this._text.text = "N/A";
@@ -97,11 +108,10 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
             Glib.Source.remove(this._timeout);
             this._timeout = null;
         }
-        let waittime = this._schema.get_int('refresh-time');
-        if (waittime > 0) {
+        if (this._waittime > 0) {
             this._timeout = Glib.timeout_add_seconds(
                 Glib.PRIORITY_DEFAULT,
-                waittime,
+                this._waittime,
                 () => { this._updateText(); return true; }
             );
         }
