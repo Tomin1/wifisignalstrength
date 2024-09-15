@@ -5,7 +5,6 @@
   "url": "https://github.com/Tomin1/wifisignalstrength",
   "gettext-domain": "wifisignalstrength",
   "settings-schema": "org.gnome.shell.extensions.wifisignalstrength",
-  "version": 5,
   "shell-version": [
     "45",
     "46"
