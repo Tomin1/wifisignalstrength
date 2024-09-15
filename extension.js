@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 Tomi Leppänen
+ * Copyright 2015-2024 Tomi Leppänen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,98 +20,90 @@
  * IN THE SOFTWARE.
  */
 
-const Lang = imports.lang;
+import Clutter from 'gi://Clutter';
+import Glib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import NM from 'gi://NM';
+import St from 'gi://St';
 
-const St = imports.gi.St;
-const Main = imports.ui.main;
-const Mainloop = imports.mainloop;
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
-const Config = imports.misc.config;
-const version = Config.PACKAGE_VERSION.split('.').map(
-    function(value, index, arr) {
-        return parseInt(value);
-});
-
-// Select NetworkManager bindings based on Gnome version.
-// Older Gnome versions (such as 3.26) require use of GObject interface
-// and newer versions (such as 3.28) require use of libnm or they will crash.
-const NM = (version[0] == 3 && version[1] < 28) ?
-    imports.gi.NMClient : imports.gi.NM;
-const DeviceTypeWIFI = (version[0] == 3 && version[1] < 28) ?
-    imports.gi.NetworkManager.DeviceType.WIFI : NM.DeviceType.WIFI;
-
-const WifiSignalMonitor = new Lang.Class({
-    Name: 'WifiSignalMonitor',
-    Extends: St.Bin,
-
-    _init: function() {
-        this.parent({ style_class: 'panel-button',
-                      reactive: true,
-                      can_focus: true,
-                      x_fill: true,
-                      y_fill: false,
-                      track_hover: true });
-        this._schema = Convenience.getSettings();
+export default class WifiSignalStrengthMonitorExtension extends Extension {
+    enable() {
+        this._widget = new PanelMenu.Button(0.0, this.metadata.name, false);
+        this._schema = this.getSettings('org.gnome.shell.extensions.wifisignalstrength');
         this._timeout = null;
-        this._waittime = this._schema.get_int('refresh-time');
         this._wifi = null;
-        let layout = new St.BoxLayout();
-        this._icon = new St.Icon({ icon_name: 'network-wireless-symbolic',
-                                   style_class: 'system-status-icon' });
-        layout.add_actor(this._icon);
+        let layout = new St.BoxLayout({ vertical: false, x_expand: true, y_align: Clutter.ActorAlign.CENTER });
+        this._icon = new St.Icon({
+            icon_name: 'network-wireless-symbolic',
+            style_class: 'system-status-icon'
+        });
+        layout.add_child(this._icon);
         this._text = new St.Label({text: "N/A"});
-        layout.add_actor(this._text);
-        this.set_child(layout);
-        this.connect('button-press-event', Lang.bind(this, this._updateText));
+        layout.add_child(this._text);
+        this._widget.add_child(layout);
+        this._widget.connect('button-press-event', () => { this._updateText(); });
         this._setupWifi();
-        this._updateText();
-    },
+        Main.panel.addToStatusArea(this.uuid, this._widget);
+    }
 
-    _updateText: function() {
+    disable() {
+        if (this._timeout) {
+            Glib.Source.remove(this._timeout);
+            this._timeout = null;
+        }
+        this._widget?.destroy();
+        this._widget = null;
+    }
+
+    _updateText() {
         let ap = undefined;
-	if (!this._wifi || !(ap = this._wifi.get_active_access_point()))
-	    this._setupWifi();
+        if (!this._wifi || !(ap = this._wifi.get_active_access_point())) {
+            this._setupWifi();
+            return;
+        }
         if (this._wifi && (ap = this._wifi.get_active_access_point())) {
             let bitrate = this._wifi.get_bitrate()/1000;
             let strength = ap.get_strength();
-            this._text.text = "%d %%, %d Mb/s".format(strength, bitrate);
-        } else
+            this._text.text = "%d %%, %d %s/s".format(
+                strength,
+                bitrate,
+                this._schema.get_boolean('mbit-units') ? 'Mbit' : 'Mb'
+            );
+        } else {
             this._text.text = "N/A";
-        this._resetTimeout();
-    },
+        }
+    }
 
-    _setupWifi: function() {
-        NM.Client.new_async(null, Lang.bind(this, function(obj, result) {
+    _setupWifi() {
+        NM.Client.new_async(null, (obj, result) => {
             let client = NM.Client.new_finish(result);
             let devices = client.get_devices();
             for (let d = 0; d < devices.length; d++) {
-                if (devices[d].get_device_type() == DeviceTypeWIFI)
+                if (devices[d].get_device_type() == NM.DeviceType.WIFI)
                     this._wifi = devices[d];
             }
-        }));
-    },
-
-    _resetTimeout: function() {
-        Mainloop.source_remove(this._timeout);
-        this._waittime = this._schema.get_int('refresh-time');
-        this._timeout = Mainloop.timeout_add_seconds(this._waittime,
-                            Lang.bind(this, this._updateText));
+            this._updateText();
+            this._setupTimeout();
+        });
     }
-});
 
-function init() {
-}
-
-let wifiMonitor;
-
-function enable() {
-    wifiMonitor = new WifiSignalMonitor();
-    Main.panel._rightBox.insert_child_at_index(wifiMonitor, 0);
-}
-
-function disable() {
-    Main.panel._rightBox.remove_child(wifiMonitor);
+    _setupTimeout() {
+        if (this._timeout) {
+            Glib.Source.remove(this._timeout);
+            this._timeout = null;
+        }
+        let waittime = this._schema.get_int('refresh-time');
+        if (waittime > 0) {
+            this._timeout = Glib.timeout_add_seconds(
+                Glib.PRIORITY_DEFAULT,
+                waittime,
+                () => { this._updateText(); return true; }
+            );
+        }
+    }
 }

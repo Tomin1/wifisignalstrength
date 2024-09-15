@@ -1,20 +1,13 @@
 {
-    "shell-version": [
-        "3.16",
-        "3.18",
-        "3.20",
-        "3.22",
-        "3.24",
-        "3.26",
-        "3.28",
-	"3.30",
-	"3.32"
-    ],
-    "name": "Wifi Signal Strength Monitor",
-    "description": "Displays Wifi Signal Strength and Speed on the panel",
-    "uuid": "wifisignalstrength@tomin.site",
-    "url": "https://github.com/Tomin1/wifisignalstrength",
-    "gettext-domain": "wifisignalstrength",
-    "settings-schema": "org.gnome.shell.extensions.wifisignalstrength",
-    "version": 4
+  "name": "Wifi Signal Strength Monitor",
+  "description": "Displays Wifi Signal Strength and Speed on the panel",
+  "uuid": "wifisignalstrength@tomin.site",
+  "url": "https://github.com/Tomin1/wifisignalstrength",
+  "gettext-domain": "wifisignalstrength",
+  "settings-schema": "org.gnome.shell.extensions.wifisignalstrength",
+  "version": 5,
+  "shell-version": [
+    "45",
+    "46"
+  ]
 }

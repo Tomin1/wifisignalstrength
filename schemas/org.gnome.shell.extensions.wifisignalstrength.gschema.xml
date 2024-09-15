@@ -6,5 +6,10 @@
             <summary>Text refresh interval</summary>
             <description>Interval to update the signal information</description>
         </key>
+        <key name="mbit-units" type="b">
+            <default>false</default>
+            <summary>Use Mbit as unit instead of Mb</summary>
+            <description>Change displayed unit abbreviation</description>
+        </key>
     </schema>
 </schemalist>
