@@ -53,15 +53,20 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
         this._widget.connect('button-press-event', () => { this._updateText(); });
         this._setupWifi();
         Main.panel.addToStatusArea(this.uuid, this._widget);
-        this._settings.connect('changed', (settings, key) => {
-            if (key == 'refresh-time') {
+        this._waittimeHandle = this._settings.connect(
+            'changed::refresh-time',
+            (settings, key) => {
                 this._waittime = settings.get_int('refresh-time');
                 this._setupTimeout();
-            } else if (key == 'mbit-units') {
+            }
+        );
+        this._unitHandle = this._settings.connect(
+            'changed::mbit-units',
+            (settings, key) => {
                 this._unit = settings.get_boolean('mbit-units') ? 'Mbit' : 'Mb';
                 this._updateText();
             }
-        });
+        );
         this._waittime = this._settings.get_int('refresh-time');
         this._unit = this._settings.get_boolean('mbit-units') ? 'Mbit' : 'Mb';
     }
@@ -70,6 +75,14 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
         if (this._timeout) {
             Glib.Source.remove(this._timeout);
             this._timeout = null;
+        }
+        if (this._waittimeHandle) {
+            this._settings.disconnect(this._waittimeHandle);
+            this._waittimeHandle = undefined;
+        }
+        if (this._unitHandle) {
+            this._settings.disconnect(this._unitHandle);
+            this._unitHandle = undefined;
         }
         this._widget?.destroy();
         this._widget = null;
