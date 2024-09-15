@@ -84,6 +84,11 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
             this._settings.disconnect(this._unitHandle);
             this._unitHandle = undefined;
         }
+        this._settings = null;
+        this._text?.destroy();
+        this._text = null;
+        this._icon?.destroy();
+        this._icon = null;
         this._widget?.destroy();
         this._widget = null;
     }
