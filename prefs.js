@@ -31,10 +31,6 @@ export default class WifiSignalMonitorPreferences extends ExtensionPreferences {
         super(metadata);
     }
 
-    getPreferencesWidget() {
-        return new Gtk.Label({ label: this.metadata.name })
-    }
-
     fillPreferencesWindow(window) {
         window._settings = this.getSettings();
         const page = new Adw.PreferencesPage({
