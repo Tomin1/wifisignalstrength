@@ -94,12 +94,13 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
     }
 
     _updateText() {
-        let ap = undefined;
-        if (!this._wifi || !(ap = this._wifi.get_active_access_point())) {
+        if (!this._wifi) {
+            this._text.text = "N/A";
             this._setupWifi();
             return;
         }
-        if (this._wifi && (ap = this._wifi.get_active_access_point())) {
+        let ap = this._wifi.get_active_access_point();
+        if (ap) {
             let bitrate = this._wifi.get_bitrate()/1000;
             let strength = ap.get_strength();
             this._text.text = "%d %%, %d %s/s".format(
@@ -109,6 +110,7 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
             );
         } else {
             this._text.text = "N/A";
+            this._wifi = null;
         }
     }
 
@@ -120,8 +122,10 @@ export default class WifiSignalStrengthMonitorExtension extends Extension {
                 if (devices[d].get_device_type() == NM.DeviceType.WIFI)
                     this._wifi = devices[d];
             }
-            this._updateText();
-            this._setupTimeout();
+            if (this._wifi) {
+                this._updateText();
+                this._setupTimeout();
+            }
         });
     }
 
